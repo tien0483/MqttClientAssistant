@@ -139,27 +139,13 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="2">
-        <widget class="QPushButton" name="pushButton_timeDelay">
-         <property name="text">
-          <string>Time Delay</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="3" alignment="Qt::AlignLeft">
-        <widget class="QPushButton" name="pushButton_logfile">
-         <property name="text">
-          <string>Log file</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
     </item>
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -408,45 +394,11 @@
     </hint>
    </hints>
   </connection>
-  <connection>
-   <sender>pushButton_timeDelay</sender>
-   <signal>pressed()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>slot_time_delay()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>46</x>
-     <y>332</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>399</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButton_logfile</sender>
-   <signal>pressed()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>slot_log_file()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>46</x>
-     <y>361</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>399</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
  </connections>
  <slots>
   <slot>slot_connect_pressed()</slot>
   <slot>slot_sub_pressed()</slot>
   <slot>slot_pub_pressed()</slot>
   <slot>slot_topic_change()</slot>
-  <slot>slot_time_delay()</slot>
-  <slot>slot_log_file()</slot>
  </slots>
 </ui>

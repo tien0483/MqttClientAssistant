@@ -11,6 +11,14 @@ import time
 import msgpack
 import ast
 import json
+import numpy as np
+import pandas as pd
+from scipy import stats
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import logging
+import seaborn as sns
+
 if getattr(sys, 'frozen', False):
     APP_DIR = sys._MEIPASS
 else:
@@ -60,7 +68,8 @@ class MqttClientAssistant(ui_mainwindow, qtbaseclass):
 
         self.pushButton_sub.setEnabled(False)
         self.pushButton_pub.setEnabled(False)
-
+        self.stock=[]
+        self.Browser_text=[]
     def slot_connect_pressed(self):
 
         if self.is_connected:
@@ -124,6 +133,7 @@ class MqttClientAssistant(ui_mainwindow, qtbaseclass):
                 # print(self.end_time)
                 # print(self.start_time)
                 self.time_measured = abs((self.end_time - self.start_time) / 1000)
+                self.stock.append(self.time_measured)
                 text_time = ("Time measured : " + str(self.time_measured) + "ms" + " \n ")
                 # self.textBrowser.append(text_time)
                 text_address= ("Message from  "+self.parent_id + " to " + self.client_id + "\n" )
@@ -131,32 +141,35 @@ class MqttClientAssistant(ui_mainwindow, qtbaseclass):
         text = '[%s] %r:%s ' % (datetime.now().strftime('%Y-%m-%d %H:%M:%S,%f'), msg.topic,msg.payload)
 
         print(text)
-        Browser_text=text_time+text_address+text
-        self.textBrowser.append(Browser_text)
+        self.Browser_text=text_time+text_address+text
+        a=[]
+        a.append(self.Browser_text)
+        self.displayLog=a
+        self.textBrowser.append(self.Browser_text)
     def slot_sub_pressed(self):
 
         if not self.is_connected:
             QMessageBox.critical(self, "Error, try again!")
             return
 
-        # if self.topics:
-            # topics = [(topic, qos) for topic, qos in self.topics.items()]
-            # topics = []
-            # text = ""
-            # topics= [self.lineEdit_topic.text(),int(self.lineEdit_qos.text())]
-            # for topic, qos in self.topics.items():
-            #     text += "%r" % topic + "," + str(qos) + "\n"
-            #     topics.append((topic, qos))
+        if self.topics:
+            topics = [(topic, qos) for topic, qos in self.topics.items()]
+            topics = []
+            text = ""
+            topics= [self.lineEdit_topic.text(),int(self.lineEdit_qos.text())]
+            for topic, qos in self.topics.items():
+                text += "%r" % topic + "," + str(qos) + "\n"
+                topics.append((topic, qos))
         if self.lineEdit_topic.text() or self.lineEdit_qos.text():
             self.client.subscribe(topic=self.lineEdit_topic.text(),qos=int(self.lineEdit_qos.text()))
             # self.lineEdit_topic.setToolTip("\n" + text)
 
-    # def slot_topic_change(self):
-    #
-    #     if self.lineEdit_topic.text() and self.lineEdit_qos.text():
-    #         self.topics[self.lineEdit_topic.text()] = int(
-    #             self.lineEdit_qos.text())
-    #         #self.topics[self.lineEdit_topic.text()]=self.lineEdit_topic.text()
+    def slot_topic_change(self):
+    
+        if self.lineEdit_topic.text() and self.lineEdit_qos.text():
+            self.topics[self.lineEdit_topic.text()] = int(
+                self.lineEdit_qos.text())
+            #self.topics[self.lineEdit_topic.text()]=self.lineEdit_topic.text()
     def slot_pub_pressed(self):
         # MeasureDuration.__enter__(self)
 
@@ -181,4 +194,20 @@ class MqttClientAssistant(ui_mainwindow, qtbaseclass):
         if topic and msg and qos:
             qos = int(qos)
             self.client.publish(topic, msg, qos)
+    def slot_log_file(self):
+        logging.basicConfig(filename="Log_Test_File.txt",
+                            level=logging.DEBUG,
+                            format='%(levelname)s: %(asctime)s %(message)s',
+                            datefmt='%m/%d/%Y %I:%M:%S')
+        logging.debug(self.Browser_text)
+
+    def slot_time_delay(self):
+        obj=pd.Series(self.stock)
+        thisDict={"Number":[],"TimeDelay":[]}
+
+        thisDict["Number"].extend(range(0,len(self.stock)))
+        thisDict["TimeDelay"].extend(self.stock)
+        dframe=pd.DataFrame(thisDict,columns=["Number","TimeDelay"])
+        g=sns.lmplot("Number","TimeDelay",dframe)
+        plt.show()
 # {"parent_id":"010203","client_id":"1513456"}
