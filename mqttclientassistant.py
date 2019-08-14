@@ -70,6 +70,10 @@ class MqttClientAssistant(ui_mainwindow, qtbaseclass):
         self.pushButton_pub.setEnabled(False)
         self.stock=[]
         self.Browser_text=[]
+        self.Time_Array=[]
+        self.Largest_time=0
+        self.Quickest_time=0
+        self.Avarage_time=0
     def slot_connect_pressed(self):
 
         if self.is_connected:
@@ -139,7 +143,7 @@ class MqttClientAssistant(ui_mainwindow, qtbaseclass):
                 text_address= ("Message from  "+self.parent_id + " to " + self.client_id + "\n" )
             break
         text = '[%s] %r:%s ' % (datetime.now().strftime('%Y-%m-%d %H:%M:%S,%f'), msg.topic,msg.payload)
-
+        self.Time_Array.append(self.time_measured)
         print(text)
         self.Browser_text=text_time+text_address+text
         a=[]
@@ -196,10 +200,15 @@ class MqttClientAssistant(ui_mainwindow, qtbaseclass):
             self.client.publish(topic, msg, qos)
     def slot_log_file(self):
         logging.basicConfig(filename="Log_Test_File.txt",
-                            level=logging.DEBUG,
+                            level=logging.info(),
                             format='%(levelname)s: %(asctime)s %(message)s',
                             datefmt='%m/%d/%Y %I:%M:%S')
-        logging.debug(self.Browser_text)
+        self.Avarage_time=np.mean(self.Time_Array)
+        self.Largest_time=self.Time_Array[np.argsort(self.Time_Array)[-n:]]
+        self.Quickest_time=np.amin(self.Time_Array)
+        logging.info("Avarage time : "+self.Avarage_time)
+        logging.info("Largest time : "+self.Largest_time)
+        logging.info("Quickest time: "+self.Quickest_time)
 
     def slot_time_delay(self):
         obj=pd.Series(self.stock)
@@ -209,5 +218,6 @@ class MqttClientAssistant(ui_mainwindow, qtbaseclass):
         thisDict["TimeDelay"].extend(self.stock)
         dframe=pd.DataFrame(thisDict,columns=["Number","TimeDelay"])
         g=sns.lmplot("Number","TimeDelay",dframe)
+        h=sns.distplot(dframe,bins=30)
         plt.show()
 # {"parent_id":"010203","client_id":"1513456"}
