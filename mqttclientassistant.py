@@ -144,6 +144,7 @@ class MqttClientAssistant(ui_mainwindow, qtbaseclass):
             break
         text = '[%s] %r:%s ' % (datetime.now().strftime('%Y-%m-%d %H:%M:%S,%f'), msg.topic,msg.payload)
         self.Time_Array.append(self.time_measured)
+
         print(text)
         self.Browser_text=text_time+text_address+text
         a=[]
@@ -199,16 +200,17 @@ class MqttClientAssistant(ui_mainwindow, qtbaseclass):
             qos = int(qos)
             self.client.publish(topic, msg, qos)
     def slot_log_file(self):
+        self.Avarage_time = np.mean(self.Time_Array)
+        self.Largest_time = np.amax(self.Time_Array)
+        self.Quickest_time = np.amin(self.Time_Array)
         logging.basicConfig(filename="Log_Test_File.txt",
-                            level=logging.info(),
-                            format='%(levelname)s: %(asctime)s %(message)s',
+                            level=logging.DEBUG,
+                            format='%(levelname)s: %(asctime)s %(message)s ',
                             datefmt='%m/%d/%Y %I:%M:%S')
-        self.Avarage_time=np.mean(self.Time_Array)
-        self.Largest_time=self.Time_Array[np.argsort(self.Time_Array)[-n:]]
-        self.Quickest_time=np.amin(self.Time_Array)
-        logging.info("Avarage time : "+self.Avarage_time)
-        logging.info("Largest time : "+self.Largest_time)
-        logging.info("Quickest time: "+self.Quickest_time)
+
+        logging.debug(" \n Avarage time : "+str(self.Avarage_time) + " \n Largest time : "+str(self.Largest_time)+ " \n Quickest time: "+str(self.Quickest_time))
+
+
 
     def slot_time_delay(self):
         obj=pd.Series(self.stock)
@@ -217,7 +219,9 @@ class MqttClientAssistant(ui_mainwindow, qtbaseclass):
         thisDict["Number"].extend(range(0,len(self.stock)))
         thisDict["TimeDelay"].extend(self.stock)
         dframe=pd.DataFrame(thisDict,columns=["Number","TimeDelay"])
+        fig, ax = plt.subplots(figsize=(10, 8))
         g=sns.lmplot("Number","TimeDelay",dframe)
-        h=sns.distplot(dframe,bins=30)
+        fig, ax = plt.subplots(figsize=(10, 8))
+        h=sns.distplot(dframe["TimeDelay"],bins=30)
         plt.show()
 # {"parent_id":"010203","client_id":"1513456"}
